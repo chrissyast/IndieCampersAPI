@@ -1,0 +1,22 @@
+{
+  "name": "indie_campers",
+  "version": "1.0.0",
+  "description": "API for returning places of interest",
+  "main": "placesRoutes.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "@google/maps": "^0.5.5",
+    "es6-promise": "^4.2.6",
+    "express": "^4.17.1",
+    "isomorphic-fetch": "^2.2.1",
+    "mongoose": "^5.5.12"
+  }
+}

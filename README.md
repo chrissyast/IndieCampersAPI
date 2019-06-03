@@ -7,6 +7,7 @@ To make an API query, you will need to use the following syntax:
 `http://localhost:3000/places/<startLat>&<startLong>&<endLat>&<endLong>&<detour(kms)>`
 
 Example:
+
 `http://localhost:3000/places/38.8564585&-9.0649598&37.0800768&-8.0034537&50`
 
 Will find places within a 100km detour from any point along the route between Indie Campers' Lisbon and Faro depots.

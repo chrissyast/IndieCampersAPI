@@ -13,55 +13,39 @@ var googleMapsClient = require('@google/maps').createClient({
 
 
 exports.find_locations = function(req, res) {
-  
     var startLong = req.params.startLong
     var startLat = req.params.startLat
     var endLong = req.params.endLong
     var endLat = req.params.endLat
     var detour = req.params.detour
-console.log('startLong:' + startLong + ' startLat: ' + startLat + ' endLong: ' + endLong + ' endLat: ' + endLat + ' detour: ' + detour)
+
     fetch(`https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248bcb5125eeeef41cba41fe3a00de9e7e9&start=${startLong},${startLat}&end=${endLong},${endLat}`)
+    
   .then(response => response.json())
   .then(data =>  tripPoints = data.features[0].geometry.coordinates)
   
-  .finally(function(){
+  .finally(async function(){
 
         var points = findTripPointsHalfDetourApart(tripPoints,detour);
         var i=0;
-        console.log(points)
         var placesOfInterest = [];
-        for (point of points){
-          var latLng = (point[1]+','+point[0])  // openrouteservice uses LongLat whereas Google uses LatLong
-          var request = {
-            location: latLng,
-            radius:(Number(detour) * 1000) < 50000 ? (Number(detour) * 1000) : 50000
-            };
-
-              googleMapsClient.placesNearby(request).asPromise()
-              .then(function(response){        
-              placesOfInterest.push(response.json.results)                 
-              }) 
-              .finally(function(){
-                i++;
-                if (i==points.length){
-                    placesOfInterest = placesOfInterest.filter(onlyUnique);
-                    flattenedPOIArray = [].concat.apply([],placesOfInterest);
-                    var placesJSObjects = [];
-                    flattenedPOIArray.forEach(function(place) {
-                            placeJSO = new PlaceOfInterest(place.name,place.rating,new Location(place.geometry.location.lat,place.geometry.location.lng))
-                            placesJSObjects.push(placeJSO);
-                    });
-
-                   var result = JSON.stringify(placesJSObjects);
-                  
-               console.log(result);
-               res.json(result);
-                       }
-              });
+        
+        for (point of points){  
+            var response = await makeGoogleRequest(point);
+            placesOfInterest.push(response.json.results)
         }
+
+        placesOfInterest = placesOfInterest.filter(onlyUnique);
+        flattenedPOIArray = [].concat.apply([],placesOfInterest);
+        var placesJSObjects = [];
+        flattenedPOIArray.forEach(function(place) {
+            placeJSO = new PlaceOfInterest(place.name,place.rating,new Location(place.geometry.location.lat,place.geometry.location.lng))
+            placesJSObjects.push(placeJSO);
+          })
+        var result = JSON.stringify(placesJSObjects);
+        res.json(result);    
       })
-  
-    }
+}
 
 class PlaceOfInterest{
   constructor(name,rating,location) {
@@ -110,4 +94,16 @@ function workOutDistanceBetween(point1,point2){
         var degreesDifference = Math.pow((Math.pow(longitudeDifference,2) + Math.pow(latitudeDifference,2)),0.5);
 
         return degreesDifference * 111;   // based on the slightly inaccurate assumption that 1 degree lat = 1 degree long = 111kms
+}
+
+
+function makeGoogleRequest(point) {
+
+    var latLng = (point[1]+','+point[0])
+    var request = {
+      location: latLng,
+      radius: 10000
+    };
+
+    return googleMapsClient.placesNearby(request).asPromise();
 }

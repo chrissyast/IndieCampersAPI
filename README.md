@@ -1,4 +1,4 @@
-In order to test the API, you will need to download the repository files. Assuming you already have Nodemon installed, navigate the command line to the root directory of the project and then run `npm start init`
+In order to test the API, you will need to download the repository files. Assuming you already have Node.js installed, navigate the command line to the root directory of the project and run `npm install` to download the node depenecies, and then run `npm start init`.
 
 This will then create a server instance on http://localhost:3000/
 
